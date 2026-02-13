@@ -1,18 +1,31 @@
 mod cli;
+mod conf;
 
-use std::path::Path;
-use mslnk::{ShellLink, MSLinkError};
 use cli::Cli;
+use conf::{Conf, load_conf};
+
+use mslnk::{ShellLink, MSLinkError};
 use clap::Parser;
 
 fn main() -> Result<(), MSLinkError> {
 
-    const DIR: &str = "C:\\Users\\Mylo\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\";
+    let conf: Conf = load_conf();
 
     let cli = Cli::parse();
+
     let target = cli.target;
-    let path_str = format!("{}{}.lnk", DIR, cli.name);
-    let path = Path::new(&path_str);
+
+    let mut destination = match cli.destination {
+        Some(dir) => dir,
+        None => {
+            if conf.is_default {
+                println!("/!\\ WARNING: you did not set a default directory. You will find your shortcut in {}", conf.default_dir.display());
+            }
+            conf.default_dir
+        },
+    };
+
+    destination.push(format!("{}.lnk", cli.name));
 
     let mut sl = ShellLink::new(target)?;
 
@@ -20,7 +33,7 @@ fn main() -> Result<(), MSLinkError> {
         sl.set_icon_location(Some(icon.into_os_string().into_string().unwrap()));
     }
 
-    sl.create_lnk(&path)?;
+    sl.create_lnk(&destination)?;
 
     Ok(())
 }

@@ -10,6 +10,9 @@ pub struct Cli {
 	#[arg(help="Target of the shortcut")]
 	pub target: PathBuf,
 
+	#[arg(help="Dir where to create the shortcut")]
+	pub destination: Option<PathBuf>,
+
 	#[arg(help="Path of the shortcut's icon")]
 	pub icon: Option<PathBuf>,
 }
