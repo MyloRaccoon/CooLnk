@@ -4,6 +4,7 @@ use std::io::{Write, Read};
 use std::fs::{File};
 use home::home_dir;
 use std::fs;
+use std::fmt;
 
 const CONF_FILE: &str = ".coolnk.conf";
 const DEFAULT_DIR: &str = "coolnk_shortcuts";
@@ -22,6 +23,16 @@ impl Default for Conf {
 			default_dir: path,
 			is_default: true,
 		}
+	}
+}
+
+impl fmt::Display for Conf {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		let is_default = match self.is_default {
+			true => "/!\\ WARNING: This is the default configuration\n",
+			false => "",
+		};
+		write!(f, "{}Default destination directory: {}", is_default, self.default_dir.display())
 	}
 }
 
@@ -57,4 +68,8 @@ pub fn load_conf() -> Conf {
 			Conf::default()
 		}
 	}
+}
+
+pub fn remove_conf() {
+	fs::remove_file(get_conf_path()).unwrap();
 }
